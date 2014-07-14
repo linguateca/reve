@@ -1,0 +1,11 @@
+
+
+<h2>Revisões em Curso</h2>
+
+<% IF current %>
+<ul>
+  <% FOREACH rev IN current %>
+    <li><a href="<% request.uri_base %>/<% rev.id %>"><% rev.titulo %></a> (<i><% rev.user %></i>)</li>
+  <% END %>
+</ul>
+<% END %>

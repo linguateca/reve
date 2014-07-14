@@ -1,0 +1,26 @@
+
+<script type="text/javascript">
+	$(function() {
+		obtain_user_name();
+	});
+</script>
+
+<div style="float: right;" id="username"></div>
+
+<h2><% project.titulo %></h2>
+
+<% FOREACH conc IN concs %>
+ <div class="conc">
+    <div class="class">
+      <select name="class<% conc.id %>">
+        <% FOREACH class IN classes %>
+        <option value="<% class.id %>"><% class.name %></option>
+        <% END %>
+      </select>
+      <textarea name="obs<% conc.id %>"></textarea>
+   </div>
+   <div class="text">
+     <% conc.text %>
+   </div>
+ </div>
+<% END %>

@@ -1,0 +1,35 @@
+body {
+	margin: 0;
+}
+
+#reve {
+	margin: 0px;
+	padding: 10px;
+	color: #FFFFFF;
+	font-weight: bold;
+	background-color: #FF6600;
+}
+
+#contents {
+	margin: 0 10px 0 10px;
+}
+
+h2 {
+	color: #CC5200;
+}
+
+.conc {
+	clear: both;
+	padding-top: 5px;
+	margin-top: 5px;
+	border-top: dashed 1px #DEDEDE;
+}
+
+.conc .text {
+	width: 80%;
+}
+
+.class {
+	width: 18%;
+	float: right;
+}
