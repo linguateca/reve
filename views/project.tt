@@ -3,21 +3,34 @@
 	$(function() {
 		obtain_user_name();
 	});
+
+  function save(button) {
+    var form    = button.parent();
+    var conc_id = form.attr("name");
+    var proj_id = $("#id").val();
+    var classe  = form.find("select[name=class" + conc_id + "]").val();
+    var obs     = form.find("textarea[name=obs" + conc_id + "]").val();
+    alert(obs);
+  }
 </script>
 
 <div style="float: right;" id="username"></div>
 
 <h2><% project.titulo %></h2>
+<hidden id="id" value="<% project.id %>"/>
 
 <% FOREACH conc IN concs %>
  <div class="conc">
     <div class="class">
+      <form name="<% conc.id %>">
       <select name="class<% conc.id %>">
         <% FOREACH class IN classes %>
         <option value="<% class.id %>"><% class.name %></option>
         <% END %>
       </select>
+      <button onClick="save($(this));" type="button">Gravar</button>
       <textarea name="obs<% conc.id %>"></textarea>
+      </form>
    </div>
    <div class="text">
      <% conc.text %>

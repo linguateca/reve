@@ -16,7 +16,12 @@
 </head>
 <body>
 
-<h1 id="reve">Rêve</h1>
+<div id="linguateca">
+	<div>
+		<a href="http://linguateca.pt">Linguateca</a>
+	</div>
+	<h1>Rêve</h1>
+</div>
 <div id="contents">
 	<% content %>
 </div>

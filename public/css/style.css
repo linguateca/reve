@@ -1,21 +1,54 @@
-body {
-	margin: 0;
+
+
+
+
+html, body {
+  margin: 0px;
+  padding: 0px; 
 }
 
-#reve {
+#linguateca {
 	margin: 0px;
-	padding: 10px;
+	padding: 0px;
+	height: 80px;
+	background-color: #2D72D7;
+	border-bottom: solid 2px rgb(37, 94, 175);
+}
+
+#linguateca div {
+	float: right;
+	padding-right: 20px;
+	text-align: right;
+}
+
+#linguateca div a:hover {
+	text-decoration: underline;
+}
+#linguateca div a {
+	padding-top: 2px;
+	padding-bottom: 2px;
+	display: block;
+	text-decoration: none;
+	color: #ffffff;
+}
+
+#linguateca h1 {
 	color: #FFFFFF;
 	font-weight: bold;
-	background-color: #FF6600;
+	margin: 0px;
+	padding-left: 20px;
+	padding-top: 20px;
 }
+
+/* -------------------------------------- */
+
 
 #contents {
 	margin: 0 10px 0 10px;
 }
 
 h2 {
-	color: #CC5200;
+	color: #5555DD;
 }
 
 .conc {
