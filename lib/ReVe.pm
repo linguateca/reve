@@ -13,6 +13,18 @@ get '/*' => sub {
 	}
 };
 
+post '/save/*/*' => sub {
+	my ($id, $conc_id) = splat;
+	my $classe   = param "classe";
+	my $obs      = param "obs";
+	my $username = param "user";
+
+	_save_revision($id, $conc_id, $classe, $obs, $username);
+
+	content_type("json");
+	to_json({status => 'ok'});
+};
+
 get '/' => sub {
     template 'index' => {
     	current => _get_projects()
@@ -60,5 +72,16 @@ sub _get_classes {
 #                          "timetamp" DATETIME NOT NULL,
 #                          "obs" VARCHAR,
 #                          PRIMARY KEY ("conc_id", "class_id", "username"))
+
+sub _save_revision {
+	my ($id, $conc_id, $classe, $obs, $username) = @_;
+	database->quick_insert( revision => {
+			conc_id   => $conc_id,
+			class_id  => $classe,
+			username  => $username,
+			timestamp => scalar(localtime),
+			obs       => $obs,
+		});
+}
 
 true;

@@ -10,14 +10,31 @@
     var proj_id = $("#id").val();
     var classe  = form.find("select[name=class" + conc_id + "]").val();
     var obs     = form.find("textarea[name=obs" + conc_id + "]").val();
-    alert(obs);
+    $.ajax({
+      "url": "<% request.uri_base %>/save/" + proj_id + "/" + conc_id,
+      "type": "POST",
+      "context": form,
+      "data": {
+        "classe": classe,
+        "obs"   : obs,
+        "user"  : $("#username").text(),
+      }
+    }).done( function(data) {
+      if (data.status == "ok") {
+        var conc_id = $(this).attr("name");
+        var classe  = $(this).find("select[name=class" + conc_id + "] option:selected").text();
+        $(this).html("<b>" + classe + "</b> [gravado]");
+      } else {
+        alert("erro ao gravar revisão.");
+      }
+    });
   }
 </script>
 
 <div style="float: right;" id="username"></div>
 
 <h2><% project.titulo %></h2>
-<hidden id="id" value="<% project.id %>"/>
+<input type="hidden" id="id" value="<% project.id %>"/>
 
 <% FOREACH conc IN concs %>
  <div class="conc">
