@@ -5,7 +5,7 @@
 <% IF current %>
 <ul>
   <% FOREACH rev IN current %>
-    <li><a href="<% request.uri_base %>/<% rev.id %>"><% rev.titulo %></a> (<i><% rev.user %></i>)</li>
+    <li><a href="<% request.uri_base %>/review/<% rev.id %>"><% rev.titulo %></a> (<i><% rev.user %></i>)</li>
   <% END %>
 </ul>
 <% END %>

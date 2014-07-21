@@ -51,11 +51,18 @@ h2 {
 	color: #5555DD;
 }
 
-.conc {
+.clear {
 	clear: both;
-	padding-top: 5px;
+}
+
+.conc {
+	padding: 5px;
 	margin-top: 5px;
 	border-top: dashed 1px #DEDEDE;
+}
+
+.done {
+	background-color: #AAFFBB;
 }
 
 .conc .text {

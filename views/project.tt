@@ -31,18 +31,28 @@
   }
 </script>
 
+<!-- % USE Dumper % -->
+<!-- % Dumper.dump_html(concs) % -->
+
 <div style="float: right;" id="username"></div>
 
 <h2><% project.titulo %></h2>
 <input type="hidden" id="id" value="<% project.id %>"/>
 
+<blockquote>
+  <% project.desc %>
+</blockquote>
+
 <% FOREACH conc IN concs %>
- <div class="conc">
+ <div class="conc <% IF conc.class %>done<% END %>">
     <div class="class">
       <form name="<% conc.id %>">
       <select name="class<% conc.id %>">
         <% FOREACH class IN classes %>
-        <option value="<% class.id %>"><% class.name %></option>
+        <option value="<% class.id %>"
+           <% IF conc.class AND conc.class == class.id %> selected <% END %>
+        >
+         <% class.name %></option>
         <% END %>
       </select>
       <button onClick="save($(this));" type="button">Gravar</button>
@@ -52,5 +62,14 @@
    <div class="text">
      <% conc.text %>
    </div>
+
+   <% IF conc.class %>
+    <div style="text-align: right;">
+      <a href="<% request.uri_base %>/details/<% project.id %>/<% conc.id %>">historial de anotações</a>&nbsp;&nbsp;&nbsp;</div>
+   <% END %>
+
+   <div class="clear"></div>
  </div>
 <% END %>
+
+
