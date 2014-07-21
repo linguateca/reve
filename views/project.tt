@@ -5,6 +5,12 @@
 	});
 
   function save(button) {
+    var user    = $("#username").text();
+    if (user == "") {
+      alert("User not defined!");
+      obtain_user_name();
+      user    = $("#username").text();
+    }
     var form    = button.parent();
     var conc_id = form.attr("name");
     var proj_id = $("#id").val();
@@ -17,7 +23,7 @@
       "data": {
         "classe": classe,
         "obs"   : obs,
-        "user"  : $("#username").text(),
+        "user"  : user,
       }
     }).done( function(data) {
       if (data.status == "ok") {
