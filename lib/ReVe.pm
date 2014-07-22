@@ -8,17 +8,24 @@ get '/review/*' => sub {
 	my ($id) = splat;
 
 	my $concs = _get_concs($id);
-	my $revs  = _get_latest_revision($id);
-	for my $c (@$concs) {
-		if (exists($revs->{$c->{id}})) {
-			$c->{class} = $revs->{$c->{id}}{class_id};
-		}
+	my $lrevs = _get_latest_revision($id);
+	for my $r (keys %$lrevs) {
+		$concs->{$r}{class} = $lrevs->{$r};
+	}
+	my $revs = _get_all_revisions($id);
+	for my $r (@$revs) {
+		$r->{timestamp} = localtime $r->{timestamp};
+		push @{$concs->{$r->{conc_id}}{revs}}, $r;
 	}
 
+	$concs = [
+		map {$concs->{$_}} sort { $a <=> $b } keys %$concs
+	];
+
 	template 'project' => {
-		project  => _get_project($id),
-		concs    => $concs,
-		classes  => _get_classes($id),
+		project   => _get_project($id),
+		concs     => $concs,
+		classes   => _get_classes($id),
 	}
 };
 
@@ -83,7 +90,7 @@ sub _get_project {
 #                      "text" varchar);
 sub _get_concs {
 	my $id = shift;
-	[ database->quick_select('conc', { rev_id => $id })]
+	+{ map { ($_->{id} => $_)} (database->quick_select('conc', { rev_id => $id })) }
 }
 
 sub _get_conc {
@@ -109,12 +116,12 @@ sub _get_classes {
 #                          "obs" VARCHAR,
 #                          PRIMARY KEY ("conc_id", "class_id", "username"))
 
-sub _get_revisions {
-	my ($conc_id) = @_;
-	[
-	 database->quick_select('revision',
-			  { conc_id => $conc_id }, { order_by => 'timestamp'} )
-	]	
+sub _get_all_revisions {
+	my ($id) = @_;
+	# classes.name, classes.desc, revision.conc_id, revision.class_id, revision.username, revision.obs, revision.timestamp
+	my $sth = database->prepare("SELECT * FROM (conc INNER JOIN revision ON conc.id = revision.conc_id) as X INNER JOIN classes ON X.class_id = classes.id WHERE X.rev_id = ?;");
+	$sth->execute($id);
+	$sth->fetchall_arrayref({});
 }
 
 sub _get_latest_revision {

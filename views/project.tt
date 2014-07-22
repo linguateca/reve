@@ -49,6 +49,10 @@
   <% project.desc %>
 </blockquote>
 
+<% use Dumper %>
+
+
+
 <% FOREACH conc IN concs %>
  <div class="conc <% IF conc.class %>done<% END %>">
     <div class="class">
@@ -70,12 +74,21 @@
    </div>
 
    <% IF conc.class %>
-    <div style="text-align: right;">
-      <a href="<% request.uri_base %>/details/<% project.id %>/<% conc.id %>">historial de anotações</a>&nbsp;&nbsp;&nbsp;</div>
+      <b style="display: block; margin-top: 10px;">Histórico</b>
+      <% FOREACH r IN conc.revs %>
+        <div>
+           <% FOREACH c IN classes %>
+             <% IF c.id == r.class_id %><% c.name %><% END %>
+           <% END %>         
+         <i>por <% r.username %> em <% r.timestamp %></i>
+         <% IF r.obs %>(<% r.obs %>)<% END %>
+        </div>
+      <% END %>
    <% END %>
 
    <div class="clear"></div>
  </div>
 <% END %>
+
 
 
