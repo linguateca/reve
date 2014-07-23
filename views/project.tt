@@ -1,6 +1,7 @@
 
 <script type="text/javascript">
 	$(function() {
+    esconder_revisoes();
 		obtain_user_name();
 	});
 
@@ -49,6 +50,7 @@
   <% project.desc %>
 </blockquote>
 
+<button onClick="toggle_revisoes($(this));">Mostrar Revisões</button>
 <% use Dumper %>
 
 
@@ -74,7 +76,8 @@
    </div>
 
    <% IF conc.class %>
-      <b style="display: block; margin-top: 10px;">Histórico</b>
+      <div class="revisoes">
+      <b>Histórico</b>
       <% FOREACH r IN conc.revs %>
         <div>
            <% FOREACH c IN classes %>
@@ -84,6 +87,7 @@
          <% IF r.obs %>(<% r.obs %>)<% END %>
         </div>
       <% END %>
+   </div>
    <% END %>
 
    <div class="clear"></div>

@@ -42,6 +42,12 @@ html, body {
 
 /* -------------------------------------- */
 
+.revisoes {
+	margin: 5px;
+	padding: 10px;
+	background-color: #ffffff;
+	border: solid 1px #757575;
+}
 
 #contents {
 	margin: 0 10px 0 10px;
