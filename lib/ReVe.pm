@@ -50,16 +50,23 @@ get '/details/*/*' => sub {
 	};
 };
 
-post '/save/*/*' => sub {
-	my ($id, $conc_id) = splat;
-	my $classe   = param "classe";
-	my $obs      = param "obs";
-	my $username = param "user";
+post '/save/*' => sub {
+	my ($id) = splat;
 
-	_save_revision($id, $conc_id, $classe, $obs, $username);
+	my $username = param('username');
+	
+	my %fields  = params();
+	my @classes = grep { /^class\d+$/ } keys %fields;
 
-	content_type("json");
-	to_json({status => 'ok'});
+	for my $class (@classes) {
+		next unless param($class) > 0;
+		$class =~ /class(\d+)/;
+		my $conc_id = $1;
+		_save_revision($id, $conc_id,
+				param($class), param("obs$conc_id"), $username);
+	}
+
+	redirect '/';
 };
 
 get '/' => sub {
@@ -133,13 +140,10 @@ sub _get_latest_revision {
 
 sub _save_revision {
 	my ($id, $conc_id, $classe, $obs, $username) = @_;
-	database->quick_insert( revision => {
-			conc_id   => $conc_id,
-			class_id  => $classe,
-			username  => $username,
-			timestamp => time,
-			obs       => $obs,
+	my $dbh = database->prepare(q{
+		INSERT OR REPLACE INTO revision VALUES (?,?,?,?,?);
 		});
+	$dbh->execute($conc_id, $classe, $username, time, $obs);
 }
 
 true;

@@ -5,10 +5,10 @@ function esconder_revisoes() {
 
 function toggle_revisoes(button) {
 	$(".revisoes").toggle();
-	if ($(".revisoes").hasClass("hide")) {
-		button.html("Mostrar Revisões");
-	} else {
+	if ($(".revisoes").is(":visible")) {
 		button.html("Esconder Revisões");
+	} else {
+		button.html("Mostrar Revisões");
 	}
 }
 
@@ -17,5 +17,5 @@ function obtain_user_name () {
 	while (!username) {
 		username = prompt("Introduza nome do utilizador.");
 	}
-	$("#username").html(username);
+	$("#username").val(username);
 }

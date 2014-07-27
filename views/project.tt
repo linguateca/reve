@@ -1,47 +1,20 @@
 
 <script type="text/javascript">
-	$(function() {
-    esconder_revisoes();
-		obtain_user_name();
-	});
-
-  function save(button) {
-    var user    = $("#username").text();
-    if (user == "") {
-      alert("User not defined!");
+  $(
+    function () {
+      esconder_revisoes();
       obtain_user_name();
-      user    = $("#username").text();
     }
-    var form    = button.parent();
-    var conc_id = form.attr("name");
-    var proj_id = $("#id").val();
-    var classe  = form.find("select[name=class" + conc_id + "]").val();
-    var obs     = form.find("textarea[name=obs" + conc_id + "]").val();
-    $.ajax({
-      "url": "<% request.uri_base %>/save/" + proj_id + "/" + conc_id,
-      "type": "POST",
-      "context": form,
-      "data": {
-        "classe": classe,
-        "obs"   : obs,
-        "user"  : user,
-      }
-    }).done( function(data) {
-      if (data.status == "ok") {
-        var conc_id = $(this).attr("name");
-        var classe  = $(this).find("select[name=class" + conc_id + "] option:selected").text();
-        $(this).html("<b>" + classe + "</b> [gravado]");
-      } else {
-        alert("erro ao gravar revisão.");
-      }
-    });
-  }
+  );
 </script>
 
 <!-- % USE Dumper % -->
 <!-- % Dumper.dump_html(concs) % -->
 
-<div style="float: right;" id="username"></div>
+<form action="<% request.uri_base %>/save/<% project.id %>"
+      method="POST" >
+<input type="text" style="float: right;" readonly
+       id="username" name="username"/>
 
 <h2><% project.titulo %></h2>
 <input type="hidden" id="id" value="<% project.id %>"/>
@@ -50,26 +23,23 @@
   <% project.desc %>
 </blockquote>
 
-<button onClick="toggle_revisoes($(this));">Mostrar Revisões</button>
+<button onClick="toggle_revisoes($(this)); return false;">Mostrar Revisões</button>
 <% use Dumper %>
 
-
-
+<input type="submit" name="save" value="Guardar"/>
 <% FOREACH conc IN concs %>
- <div class="conc <% IF conc.class %>done<% END %>">
+ <div class="conc">
     <div class="class">
-      <form name="<% conc.id %>">
       <select name="class<% conc.id %>">
+       <option value="0">---</option>
         <% FOREACH class IN classes %>
         <option value="<% class.id %>"
-           <% IF conc.class AND conc.class == class.id %> selected <% END %>
+           <% IF conc.class AND conc.class.class_id == class.id %> selected <% END %>
         >
          <% class.name %></option>
         <% END %>
       </select>
-      <button onClick="save($(this));" type="button">Gravar</button>
       <textarea name="obs<% conc.id %>"></textarea>
-      </form>
    </div>
    <div class="text">
      <% conc.text %>
@@ -93,6 +63,7 @@
    <div class="clear"></div>
  </div>
 <% END %>
-
+<input type="submit" name="save" value="Guardar"/>
+</form>
 
 
