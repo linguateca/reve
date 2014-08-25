@@ -1,0 +1,27 @@
+
+<h2><% project.titulo %></h2>
+
+<blockquote>
+  <% project.desc %>
+</blockquote>
+
+<% use Dumper %>
+<!-- % Dumper.dump_html(rev) % -->
+
+<% FOREACH conc IN concs %>
+ <div class="conc">
+
+   <div class="class">
+     <% cid = conc.id; class = rev.$cid; classes.$class.name %>
+   </div>
+   
+   <div class="text">
+     <% conc.text %>
+   </div>
+
+   <div class="clear"></div>
+ </div>
+<% END %>
+</form>
+
+

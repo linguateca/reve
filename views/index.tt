@@ -5,9 +5,12 @@
 <% IF current %>
 <ul>
   <% FOREACH rev IN current %>
-    <li><% rev.titulo %> (<i><% rev.user %></i>)</li>
-       [ <a href="<% request.uri_base %>/review/<% rev.id %>">Rever anotação</a> |
-       <a href="#">Anotar de novo</a>]
+    <li><% rev.titulo %>
+      <ul>
+        <li>Ferramentas: <a href="<% request.uri_base %>/review/<% rev.id %>">Rever anotação</a>, <a href="#">Anotar de novo</a></li>
+        <li>Revisões disponíveis: <% FOREACH reviser IN rev.revisors %><a href="<% request.uri_base %>/view/<% rev.id %>/<% reviser %>"><% reviser %></a>,  <% END %></li>
+      </ul>
+    </li>
   <% END %>
 </ul>
 <% END %>

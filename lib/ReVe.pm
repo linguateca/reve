@@ -4,6 +4,32 @@ use Dancer2::Plugin::Database;
 
 our $VERSION = '0.1';
 
+get '/view/*/*' => sub {
+    my ($project_id, $username) = splat;
+    my $concs = _get_concs($project_id);
+
+    # XXX -- talvez colocar isto no _get_concs??
+    $concs = [
+              map {$concs->{$_}} sort { $a <=> $b } keys %$concs
+             ];
+
+    my $revision = _get_user_revisions($project_id, $username);
+
+    my $classes = _get_classes($project_id);
+    my $class_by_id = {};
+    for (@$classes) {
+        $class_by_id->{$_->{id}} = $_;
+    }
+
+    template 'view' => 
+      {
+       classes => $class_by_id,
+       rev     => $revision,
+       concs   => $concs,
+       project => _get_project($project_id),
+      };
+};
+
 get '/review/*' => sub {
 	my ($id) = splat;
 
@@ -83,7 +109,11 @@ get '/' => sub {
 #                     "user" VARCHAR,
 #                     "desc" VARCHAR)
 sub _get_projects {
-	[ database->quick_select('rev', {}) ]
+    my @projects = database->quick_select('rev', {});
+    for (@projects) {
+        $_->{revisors} = _get_users_for_project($_->{id});
+    }
+    return \@projects;
 }
 
 sub _get_project {
@@ -144,6 +174,37 @@ sub _save_revision {
 		INSERT OR REPLACE INTO revision VALUES (?,?,?,?,?);
 		});
 	$dbh->execute($conc_id, $classe, $username, time, $obs);
+}
+
+sub _get_user_revisions {
+    my ($pid, $uname) = @_;
+    my $sth = database->prepare(q{
+            SELECT revision.conc_id, revision.class_id
+            FROM revision INNER JOIN conc
+            ON revision.conc_id = conc.id
+            WHERE conc.rev_id = ? AND revision.username = ?;
+    });
+    $sth->execute($pid, $uname);
+    my $data = $sth->fetchall_arrayref( {} );
+    my $res = {};
+    for (@$data) {
+        $res->{$_->{conc_id}} = $_->{class_id}
+    }
+    return $res;
+    
+}
+
+sub _get_users_for_project {
+    my ($id) = @_;
+    my $sth = database->prepare(q{
+            SELECT DISTINCT(revision.username)
+            FROM revision INNER JOIN conc
+            ON revision.conc_id = conc.rev_id
+            WHERE conc.rev_id = ?;
+    });
+    $sth->execute($id);
+    my $res = $sth->fetchall_arrayref( [] );
+    return [ map { $_->[0] } @$res ];
 }
 
 true;
