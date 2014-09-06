@@ -23,8 +23,10 @@
   <% project.desc %>
 </blockquote>
 
+<% UNLESS bootstrap %>
 <button onClick="toggle_revisoes($(this)); return false;">Mostrar Revisões</button>
-<% use Dumper %>
+<% END %>
+
 
 <input type="submit" name="save" value="Guardar"/>
 <% FOREACH conc IN concs %>

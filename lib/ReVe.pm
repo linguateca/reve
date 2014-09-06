@@ -55,6 +55,23 @@ get '/review/*' => sub {
 	}
 };
 
+get '/bootstrap/*' => sub {
+	my ($id) = splat;
+
+	my $concs = _get_concs($id);
+	$concs = [
+		map {$concs->{$_}} sort { $a <=> $b } keys %$concs
+	];
+
+	template 'project' => {
+		project   => _get_project($id),
+		concs     => $concs,
+		classes   => _get_classes($id),
+		bootstrap => 1,
+	}
+};
+
+
 get '/details/*/*' => sub {
 	my ($id, $conc_id) = splat;
 
@@ -199,7 +216,7 @@ sub _get_users_for_project {
     my $sth = database->prepare(q{
             SELECT DISTINCT(revision.username)
             FROM revision INNER JOIN conc
-            ON revision.conc_id = conc.rev_id
+            ON revision.conc_id = conc.id
             WHERE conc.rev_id = ?;
     });
     $sth->execute($id);
