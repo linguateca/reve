@@ -6,13 +6,15 @@
 </blockquote>
 
 <% use Dumper %>
-<!-- % Dumper.dump_html(rev) % -->
+<!-- % Dumper.dump_html(concs) % -->
 
 <% FOREACH conc IN concs %>
  <div class="conc">
 
    <div class="class">
-     <% cid = conc.id; class = rev.$cid; classes.$class.name %>
+     <% cid = conc.id; class = rev.$cid.class; classes.$class.name %>
+     <br/>
+     <i><% rev.$cid.obs %></i>
    </div>
    
    <div class="text">

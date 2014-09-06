@@ -196,7 +196,7 @@ sub _save_revision {
 sub _get_user_revisions {
     my ($pid, $uname) = @_;
     my $sth = database->prepare(q{
-            SELECT revision.conc_id, revision.class_id
+            SELECT revision.conc_id, revision.class_id, revision.obs
             FROM revision INNER JOIN conc
             ON revision.conc_id = conc.id
             WHERE conc.rev_id = ? AND revision.username = ?;
@@ -205,7 +205,7 @@ sub _get_user_revisions {
     my $data = $sth->fetchall_arrayref( {} );
     my $res = {};
     for (@$data) {
-        $res->{$_->{conc_id}} = $_->{class_id}
+        $res->{$_->{conc_id}} = {class => $_->{class_id}, obs => $_->{obs}};
     }
     return $res;
     
