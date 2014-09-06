@@ -22,6 +22,7 @@
 	</div>
 	<h1>Rêve</h1>
 </div>
+<input type="hidden" id="uri_base" value="<% request.uri_base %>"/>
 <div id="contents">
 	<% content %>
 </div>

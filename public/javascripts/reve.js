@@ -14,8 +14,11 @@ function toggle_revisoes(button) {
 
 function obtain_user_name () {
 	var username = null;
-	while (!username) {
-		username = prompt("Introduza nome do utilizador.");
+	username = prompt("Introduza nome do utilizador.");
+
+	if (!username) {
+		window.location = $("#uri_base").val();
 	}
+
 	$("#username").val(username);
 }
