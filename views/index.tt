@@ -1,6 +1,11 @@
 
+<p>
+  <form action="<% request.uri_base %>/new" method="POST">
+    <button class="new" type="submit" >Novo Projeto de Rêvisão.</button>
+  </form>
+</p>
 
-<h2>Revisões em Curso</h2>
+<h2>Rêvisões em Curso</h2>
 
 <% IF current %>
 <ul>

@@ -1,0 +1,12 @@
+
+<h2>Criar uma nova Rêvisão</h2>
+
+<h3><% title %></h3>
+
+<% i = 0 %>
+<% FOREACH conc IN current.results %>
+<div class="conc">
+  <input type="checkbox" name="conc" value="<% i %>"/>
+  <% conc %></div>
+<% i = i + 1 %>
+<% END %>

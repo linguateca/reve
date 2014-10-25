@@ -1,8 +1,45 @@
 package ReVe;
 use Dancer2;
 use Dancer2::Plugin::Database;
+use PHP::Include (our => 1);
+use CWB::CQP::More;
+use Try::Tiny;
+
+include_php_vars("/var/www/html/acesso/var_corpora.php");
+#line 8
+# put this line number in the line above
 
 our $VERSION = '0.1';
+
+post '/new' => sub {
+    my $step = defined param("step") ? param("step") : 0;
+
+    return template 'new1' if $step == 0;
+
+    if ($step == 1) {
+        my $title = param("title");
+        redirect "/" unless defined $title and length($title) > 4;
+        my $session = { title => $title };
+        $session->{desc}   = param("desc")   if defined param("desc");
+        $session->{author} = param("author") if defined param("author");
+        session status => $session;
+        return template 'new2' => { %$session, corpora => {%corpora} };
+    }
+
+    if ($step == 2) {
+        my $session = session "status";
+        redirect "/" unless defined param("query");
+
+        $session->{current} = {
+                               results => [ query(param("corpo"), param("query")) ],
+                               query => param("query"),
+                               corpo => param("corpo")
+                              };
+
+        return template 'new3' => { %$session,
+                                    corpora => {%corpora} };
+    }
+};
 
 get '/view/*/*' => sub {
     my ($project_id, $username) = splat;
@@ -222,6 +259,31 @@ sub _get_users_for_project {
     $sth->execute($id);
     my $res = $sth->fetchall_arrayref( [] );
     return [ map { $_->[0] } @$res ];
+}
+
+sub query {
+    my ($corpo, $query) = @_;
+
+    my $cqp = CWB::CQP::More->new( { utf8 => 0 } );
+    $cqp->change_corpus(uc $corpo);
+    $cqp->set(Context  => [1, 's'],
+              LD       => "'<b>'",
+              RD       => "'</b>'");
+
+    $query = guess_query($query);
+
+    try {
+        $cqp->exec("A = $query;");
+        my $result_size = $cqp->size('A');
+        $result_size = 1000 if $result_size > 1000;
+        return $cqp->cat('A', 0, $result_size);
+    } catch {
+        die "Erro ao procurar: $query\n";
+    };
+}
+
+sub guess_query {
+    return $_[0];
 }
 
 true;
