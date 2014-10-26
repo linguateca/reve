@@ -20,7 +20,7 @@
 	<div>
 		<a href="http://linguateca.pt">Linguateca</a>
 	</div>
-	<h1>Rêve</h1>
+	<h1><a class="title" href="<% request.uri_base %>">Rêve</a></h1>
 </div>
 <input type="hidden" id="uri_base" value="<% request.uri_base %>"/>
 <div id="contents">

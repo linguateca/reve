@@ -3,10 +3,33 @@
 
 <h3><% title %></h3>
 
-<% i = 0 %>
+
+<% IF session.status.concs.size > 0 %>
+  <p>Até ao momento já recolheu <% session.status.concs.size %> exemplos.</p>
+<% END %>
+
+
+<form action="<% request.uri_base %>/new" method="POST">
+
+<input type="hidden" name="step" value="3"/>
+
+<p>
+  <button type="submit" name="submit" value="addMore">Adicionar Mais Ocorrências</button>
+  <button type="submit" name="submit" value="addEnd">Continuar &gt;</button>
+</p>
+
 <% FOREACH conc IN current.results %>
 <div class="conc">
-  <input type="checkbox" name="conc" value="<% i %>"/>
-  <% conc %></div>
-<% i = i + 1 %>
+  <label>
+    <input type="checkbox" name="conc" value="<% conc %>"/><% conc %>
+  </label>
+</div>
 <% END %>
+
+
+<p>
+  <button type="submit" name="submit" value="addMore">Adicionar Mais Ocorrências</button>
+  <button type="submit" name="submit" value="addEnd">Continuar &gt;</button>
+</p>
+
+</form>

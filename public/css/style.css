@@ -1,44 +1,35 @@
 
+a.title { 
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+a.title:hover { 
+  text-decoration: underline;
+  color: #FFFFFF;
+}
+
+button, select, textarea, input { 
+  border: solid 1px #777777;
+  border-radius: 5px;
+  padding: 4px;
+}
+
+button:hover, input[type="submit"]:hover { 
+  background-color: #dddddd;
+  cursor: pointer;
+}
+
+
+
 .required { 
   color: #AA0000;
 }
 
 label {  
   display: block;
-  font-weight: bold;
 }
 
-input[type="submit"]:hover { 
-  background-color: #dddddd;
-  cursor: pointer;
-}
-
-select, textarea, input { 
-  border: solid 1px #777777;
-  border-radius: 5px;
-  padding: 4px;
-}
-
-
-
-button.new:hover { 
-  cursor: pointer;
-  background: #dedede url("../images/new.png") no-repeat 4px 4px;
-}
-
-button.new { 
-  background: #eeeeee url("../images/new.png") no-repeat 4px 4px;
-  padding-left: 40px;
-}
-
-button { 
-  height: 40px;
-  padding: 4px;
-  color: #000099;
-  font-weight: bold;
-  border-radius: 5px;
-  border: solid 1px #777777;
-}
 
 html, body {
   margin: 0px;

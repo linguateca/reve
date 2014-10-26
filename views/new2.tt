@@ -3,4 +3,30 @@
 
 <h3><% title %></h3>
 
-<% PROCESS query.tt %>
+
+<% IF session.status.concs.size > 0 %>
+  <p>Até ao momento já recolheu <% session.status.concs.size %> exemplos.</p>
+<% END %>
+
+
+<form action="<% request.uri_base %>/new" method="POST">
+  <input type="hidden" name="step" value="2"/>
+
+  <p>
+    <label for="corpo">Corpo:</label>
+    <select id="corpo" name="corpo">
+      <% FOREACH c IN corpora.keys.sort %>
+      <option value="<% c %>"><% corpora.$c %></option>
+      <% END %>
+    </select>
+  </p>
+  <p>
+    <label for="query">Expressão de pesquisa:</label>
+    <input type="text" name="query" id="query" size="50" />
+  </p>
+  <p>
+    <input type="submit" value=" procurar "/>
+  </p>
+</form>
+
+

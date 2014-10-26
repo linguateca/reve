@@ -14,12 +14,17 @@ our $VERSION = '0.1';
 post '/new' => sub {
     my $step = defined param("step") ? param("step") : 0;
 
-    return template 'new1' if $step == 0;
+    my $session = session "status" || {};
+
+    if ($step == 0) {
+        session stauts => {};
+        return template 'new1' if $step == 0;
+    }
 
     if ($step == 1) {
         my $title = param("title");
         redirect "/" unless defined $title and length($title) > 4;
-        my $session = { title => $title };
+        $session->{title}  = $title;
         $session->{desc}   = param("desc")   if defined param("desc");
         $session->{author} = param("author") if defined param("author");
         session status => $session;
@@ -27,7 +32,6 @@ post '/new' => sub {
     }
 
     if ($step == 2) {
-        my $session = session "status";
         redirect "/" unless defined param("query");
 
         $session->{current} = {
@@ -36,8 +40,39 @@ post '/new' => sub {
                                corpo => param("corpo")
                               };
 
+        session status => $session;
         return template 'new3' => { %$session,
                                     corpora => {%corpora} };
+    }
+
+    if ($step == 3) {
+        redirect "/" unless defined param("submit");
+
+        my $action = param("submit");
+        my $concs  = param("conc");
+        $concs = [$concs] unless ref($concs) eq "ARRAY";
+
+        push @{$session->{concs}}, @$concs;
+
+        session status => $session;
+
+        if ($action eq "addEnd") {
+            return template 'new4';
+        } else {
+            return template 'new2' => { %$session, corpora => {%corpora} };
+        }
+    }
+
+    if ($step == 4) {
+        redirect "/" unless defined param("class");
+
+        my $class = param("class");
+        $class = [$class] unless ref $class eq "ARRAY";
+        my $descriptors = param("classD");
+        $descriptors = [$descriptors] unless ref $descriptors eq "ARRAY";
+
+        use Data::Dumper;
+        return Dumper({ classes => $class, descriptors => $descriptors });
     }
 };
 
