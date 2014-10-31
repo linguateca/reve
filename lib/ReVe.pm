@@ -26,7 +26,7 @@ post '/new' => sub {
         redirect "/" unless defined $title and length($title) > 4;
         $session->{title}  = $title;
         $session->{desc}   = param("desc")   if defined param("desc");
-        $session->{author} = param("author") if defined param("author");
+        $session->{author} = param("author") if defined param("autor");
         session status => $session;
         return template 'new2' => { %$session, corpora => {%corpora} };
     }
@@ -66,13 +66,23 @@ post '/new' => sub {
     if ($step == 4) {
         redirect "/" unless defined param("class");
 
+        delete $session->{current};
+
         my $class = param("class");
         $class = [$class] unless ref $class eq "ARRAY";
         my $descriptors = param("classD");
         $descriptors = [$descriptors] unless ref $descriptors eq "ARRAY";
 
-        use Data::Dumper;
-        return Dumper({ classes => $class, descriptors => $descriptors });
+        while (@$class) {
+            my $c = shift @$class;
+            my $d = shift @$descriptors;
+            $session->{classes}{$c} = $d;
+        }
+
+        _save($session);
+        session status => {};
+
+        return forward "/", {}, {method=>'GET'};
     }
 };
 
@@ -319,6 +329,30 @@ sub query {
 
 sub guess_query {
     return $_[0];
+}
+
+# CREATE TABLE "rev" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "titulo" , "open" BOOL NOT NULL  DEFAULT 1, "user" VARCHAR, "desc" VARCHAR);
+# CREATE TABLE "conc" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "rev_id" INTEGER NOT NULL , "text" varchar);
+# CREATE TABLE "classes" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "rev_id" INTEGER NOT NULL , "order" INTEGER NOT NULL , "name" VARCHAR NOT NULL , "desc" VARCHAR);
+
+sub _save {
+    my $struct = shift;
+
+    database->quick_insert( rev => { titulo => $struct->{title},
+                                     user   => $struct->{author} || "anonymous",
+                                     desc   => $struct->{desc} || "---" });
+    $struct->{id} = database->last_insert_id(undef, undef, 'rev', 'id');
+
+    for my $c (keys %{$struct->{classes}}) {
+        database->quick_insert(classes => { rev_id => $struct->{id},
+                                            order  => 1,
+                                            name   => $c,
+                                            desc   => $struct->{classes}{$c} });
+    }
+
+    for my $c (@{$struct->{concs}}) {
+        database->quick_insert(conc => { rev_id => $struct->{id}, text => $c });
+    }
 }
 
 true;
