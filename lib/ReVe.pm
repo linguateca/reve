@@ -112,6 +112,47 @@ get '/view/*/*' => sub {
       };
 };
 
+get '/tsv/*' => sub {
+    my ($id) = splat;
+
+    my $users   = _get_users_for_project($id); ## [ username ]
+    my $concs   = _get_concs($id);             ## id -> { hash }
+    my $revs    = _get_all_revisions($id);
+
+    content_type "text/tsv";
+
+    my $tsv = "id\tconc\t".join("\t",@$users)."\n";
+
+    my $data;
+
+    for my $record (@$revs) {
+        my $text = $record->{text};
+
+        $text =~ s/[\n\t]/ /g;
+        $text =~ s/\s+/ /g;
+
+        $data->{$record->{conc_id}}{conc} = $text;
+        $data->{$record->{conc_id}}{revs}{$record->{username}} = $record->{name};
+    }
+
+    for my $id (sort keys %$data) {
+        $tsv .= "$id\t" . $data->{$id}{conc};
+        for my $user (@$users) {
+            $tsv .= "\t";
+            if (exists($data->{$id}{revs}{$user})) {
+                $tsv .= $data->{$id}{revs}{$user};
+            } else {
+                $tsv .= "---";
+            }
+        }
+        $tsv .= "\n";
+    }
+
+    header content_disposition => "inline; filename=$id.tsv";
+
+    return $tsv;
+};
+
 get '/review/*' => sub {
 	my ($id) = splat;
 
@@ -179,7 +220,7 @@ post '/save/*' => sub {
 	my ($id) = splat;
 
 	my $username = param('username');
-	
+
 	my %fields  = params();
 	my @classes = grep { /^class\d+$/ } keys %fields;
 

@@ -1,6 +1,5 @@
 
 <p>
-  <b>!! Em desenvolvimento !!</b>
   <form action="<% request.uri_base %>/new" method="POST">
     <button class="new" type="submit" >Novo Projeto de Rêvisão.</button>
   </form>
@@ -13,7 +12,7 @@
   <% FOREACH rev IN current %>
     <li><% rev.titulo %>
       <ul>
-        <li>Ferramentas: <a href="<% request.uri_base %>/review/<% rev.id %>">Rever anotação</a>, <a href="<% request.uri_base %>/bootstrap/<% rev.id %>">Anotar de novo</a></li>
+        <li>Ferramentas: <a href="<% request.uri_base %>/review/<% rev.id %>">Rever anotação</a>, <a href="<% request.uri_base %>/bootstrap/<% rev.id %>">Anotar de novo</a>,  <a href="<% request.uri_base %>/tsv/<% rev.id %>">TSV</a></li>
         <li>Revisões disponíveis: <% FOREACH reviser IN rev.revisors %><a href="<% request.uri_base %>/view/<% rev.id %>/<% reviser %>"><% reviser %></a>,  <% END %></li>
       </ul>
     </li>
