@@ -1,0 +1,87 @@
+<style type="text/css">
+  
+.table-nonfluid {
+width: auto !important;
+}
+
+.air { margin-bottom: 30px; margin-left: 10px; margin-right: 10px;}
+
+  </style>
+
+<div class="air">
+  <h3>Contabilização Independente</h3>
+
+    <p>Contabilização de categorias de forma independente.
+    Isto leva a que a soma total de cada coluna não seja necessariamente a mesma.</p>
+
+
+<table class="table table-striped table-condensed table-nonfluid table-bordered">
+  <thead>
+    <tr>
+      <th></th>
+      <% FOREACH user IN by_author.keys.sort %>
+        <th><% user %></th>
+      <% END %>
+    </tr>
+  </thead>
+  <tbody>
+    <% FOREACH class IN classes %>
+    <tr>
+      <td><% class %></td>
+      <% FOREACH user IN by_author.keys.sort %>
+        <td><% by_author.$user.$class || 0 %></td>
+      <% END %>
+    </tr>
+    <% END %>
+  </tbody>
+</table>
+</div>
+
+<div class="air">
+  <h3>Contabilização Combinatória</h3>
+
+<p>Nesta contabilização, cada classificação múltipla é considerada como uma categoria independente.</p>
+
+
+<table class="table table-striped table-condensed table-nonfluid table-bordered">
+  <thead>
+    <tr>
+      <th></th>
+      <% FOREACH user IN detailed.keys.sort %>
+        <th><% user %></th>
+      <% END %>
+    </tr>
+  </thead>
+  <tbody>
+    <% FOREACH class IN detailed_classes %>
+    <tr>
+      <td><% class %></td>
+      <% FOREACH user IN detailed.keys.sort %>
+        <td><% detailed.$user.$class || 0 %></td>
+      <% END %>
+    </tr>
+    <% END %>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+<div class="air">
+
+<h3>Discordâncias</h3>
+
+<ul>
+<% FOREACH conc IN by_conc.keys.sort %>
+   <% IF by_conc.$conc.revs.keys.size > 1 %>
+   <li><% by_conc.$conc.conc %>
+     <ul>
+       <% FOREACH class IN by_conc.$conc.revs.keys %>
+       <li><b><% class %>:</b> <% by_conc.$conc.revs.$class.join(", ") %></li>
+       <% END %>
+     </ul>
+   </li>
+   <% END %>
+<% END %>
+</ul>
+</div>

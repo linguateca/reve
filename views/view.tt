@@ -1,6 +1,10 @@
 
 <h2><% project.titulo %></h2>
 
+<div style="float: right">
+  <form action="<% request.uri_base %>/bootstrap/<% project.id %>/<% username %>">
+    <button type="submit"><span class="glyphicon glyphicon-pencil"></span> Rêver esta anotação</button></form>
+</div>
 <blockquote>
   <% project.desc %>
 </blockquote>
@@ -12,9 +16,13 @@
  <div class="conc">
 
    <div class="class">
-     <% cid = conc.id; class = rev.$cid.class; classes.$class.name %>
+     <% cid = conc.id; %>
+     <% FOREACH class IN revs.$cid %>
+       <% classes.$class.name %>
+       <%- ", " UNLESS loop.last%> 
+     <% END %>
      <br/>
-     <i><% rev.$cid.obs %></i>
+     <i><% obs.$cid %></i>
    </div>
    
    <div class="text">
