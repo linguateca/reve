@@ -1,7 +1,12 @@
 #!/usr/bin/env perl
 
+use Plack::Builder;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use ReVe;
-ReVe->dance;
+
+
+builder {
+    mount '/reve' => ReVe->to_app;
+};

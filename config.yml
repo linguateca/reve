@@ -18,20 +18,14 @@ charset: "UTF-8"
 # simple: default and very basic template engine
 # template_toolkit: TT
 
-session: Cookie
-
+behind_proxy: 1
 template: "template_toolkit"
 engines:
    template:
      template_toolkit:
        start_tag: '<%'
        end_tag:   '%>'
-  session:
-    Cookie:
-      secret_key: your secret passphrase
-      default_duration: 604800
-
 plugins:
    Database:
      driver: 'SQLite'
-     database: 'db/reve.sqlite'
+     database: '/linguateca/aplicacoes_web/Reve/db/reve.sqlite'
