@@ -5,10 +5,11 @@ use PHP::Include (our => 1);
 use CWB::CQP::More;
 use Try::Tiny;
 
-include_php_vars("/var/www/html/acesso/var_corpora.php");
-#line 8
+include_php_vars("/linguateca/www/html/acesso/var_corpora.php");
+#line 10
 # put this line number in the line above
 
+our $debug = 0;
 our $VERSION = '0.1';
 
 post '/new' => sub {
@@ -17,18 +18,21 @@ post '/new' => sub {
     my $session = session "status" || {};
 
     if ($step == 0) {
-        session stauts => {};
-        return template 'new1' if $step == 0;
+        session status => {};
+        return template 'new1';
     }
 
     if ($step == 1) {
         my $title = param("title");
         redirect "/" unless defined $title and length($title) > 4;
         $session->{title}  = $title;
-        $session->{desc}   = param("desc")   if defined param("desc");
-        $session->{author} = param("author") if defined param("autor");
+        $session->{concs}  = [];
+        $session->{desc}   = param("desc")  if defined param("desc");
+        $session->{author} = param("autor") if defined param("autor");
         session status => $session;
-        return template 'new2' => { %$session, corpora => {%corpora} };
+        return template 'new2' => { %$session,
+                                    show_debug => $debug, 
+                                    corpora => \%corpora };
     }
 
     if ($step == 2) {
@@ -37,12 +41,13 @@ post '/new' => sub {
         $session->{current} = {
                                results => [ query(param("corpo"), param("query")) ],
                                query => param("query"),
-                               corpo => param("corpo")
+                               corpo => param("corpo"),
                               };
 
         session status => $session;
-        return template 'new3' => { %$session,
-                                    corpora => {%corpora} };
+        return template 'new3' => { show_debug => $debug, 
+                                 %$session,
+                                    corpora => \%corpora };
     }
 
     if ($step == 3) {
@@ -52,14 +57,15 @@ post '/new' => sub {
         my $concs  = param("conc");
         $concs = [$concs] unless ref($concs) eq "ARRAY";
 
-        push @{$session->{concs}}, @$concs;
+        push @{$session->{concs}}, 
+            map { $session->{current}{results}[$_] } @$concs;
 
         session status => $session;
 
         if ($action eq "addEnd") {
-            return template 'new4';
+            return template 'new4' => {  show_debug => $debug };
         } else {
-            return template 'new2' => { %$session, corpora => {%corpora} };
+            return template 'new2' => { show_debug => $debug,  %$session, corpora => {%corpora} };
         }
     }
 
@@ -95,18 +101,20 @@ get '/view/*/*' => sub {
               map {$concs->{$_}} sort { $a <=> $b } keys %$concs
              ];
 
-    my $revision = _get_user_revisions($project_id, $username);
-
+    my $obs = _get_user_obs($project_id, $username);
+    my $revisions = _get_user_revisions($project_id, $username);
     my $classes = _get_classes($project_id);
     my $class_by_id = {};
     for (@$classes) {
         $class_by_id->{$_->{id}} = $_;
     }
 
-    template 'view' => 
+    template 'view' =>
       {
+       username => $username,
        classes => $class_by_id,
-       rev     => $revision,
+       revs    => $revisions,
+       obs     => $obs,
        concs   => $concs,
        project => _get_project($project_id),
       };
@@ -119,7 +127,7 @@ get '/tsv/*' => sub {
     my $concs   = _get_concs($id);             ## id -> { hash }
     my $revs    = _get_all_revisions($id);
 
-    content_type "text/tsv";
+
 
     my $tsv = "id\tconc\t".join("\t",@$users)."\n";
 
@@ -132,7 +140,7 @@ get '/tsv/*' => sub {
         $text =~ s/\s+/ /g;
 
         $data->{$record->{conc_id}}{conc} = $text;
-        $data->{$record->{conc_id}}{revs}{$record->{username}} = $record->{name};
+        push @{$data->{$record->{conc_id}}{revs}{$record->{username}}}, $record->{name};
     }
 
     for my $id (sort keys %$data) {
@@ -140,7 +148,7 @@ get '/tsv/*' => sub {
         for my $user (@$users) {
             $tsv .= "\t";
             if (exists($data->{$id}{revs}{$user})) {
-                $tsv .= $data->{$id}{revs}{$user};
+                $tsv .= join(",", @{$data->{$id}{revs}{$user}});
             } else {
                 $tsv .= "---";
             }
@@ -149,8 +157,67 @@ get '/tsv/*' => sub {
     }
 
     header content_disposition => "inline; filename=$id.tsv";
+    content_type "text/tsv";
+    return $tsv
+};
 
-    return $tsv;
+get '/json/*/*' => sub {
+    my ($id, $user) = splat;
+
+    my $obs = _get_user_obs($id, $user);
+    my $revisions = _get_user_revisions($id, $user);
+
+    content_type "application/json";
+    to_json({ obs => $obs, revs => $revisions });
+};
+
+get '/stats/*' => sub {
+    my ($id) = splat;
+    my $users   = _get_users_for_project($id); ## [ username ]
+    my $concs   = _get_concs($id);             ## id -> { hash }
+    my $revs    = _get_all_revisions($id);
+
+    my $by_conc;
+    my $by_author;
+    my $classes;
+    my $offclasses = _get_classes($id);
+    my $detailed;
+
+    for my $record (@$revs) {
+        my $text = $record->{text};
+
+        $text =~ s/[\n\t]/ /g;
+        $text =~ s/\s+/ /g;
+
+        $by_conc->{$record->{conc_id}}{conc} = $text;
+
+        $by_author->{$record->{username}}{$record->{name}}++;
+        $classes->{$record->{name}}++;
+
+        $detailed->{$record->{conc_id}}{$record->{username}}{$record->{name}}++;
+    }
+
+    my $detailed_classes;
+    my $detailed_count;
+    for my $conc (keys %$detailed) {
+        for my $author (keys %{$detailed->{$conc}}) {
+            my $tag = join("|", sort keys %{$detailed->{$conc}{$author}});
+            $detailed->{$conc}{$author} = $tag;
+            $detailed_count->{$author}{$tag}++;
+            $detailed_classes->{$tag}++;
+
+            push @{$by_conc->{$conc}{revs}{$tag}}, $author;
+        }
+    }
+
+    template 'stats' => {
+                         by_author => $by_author,
+                         classes => [map { $_->{name} } @$offclasses],
+                         by_conc => $by_conc,
+                         detailed => $detailed_count,
+                         detailed_classes => [sort keys %$detailed_classes],
+                        }
+
 };
 
 get '/review/*' => sub {
@@ -195,6 +262,24 @@ get '/bootstrap/*' => sub {
 };
 
 
+get '/bootstrap/*/*' => sub {
+	my ($id, $user) = splat;
+
+	my $concs = _get_concs($id);
+	$concs = [
+		map {$concs->{$_}} sort { $a <=> $b } keys %$concs
+	];
+
+	template 'project' => {
+                               from_user => $user,
+                               project   => _get_project($id),
+                               concs     => $concs,
+                               classes   => _get_classes($id),
+                               bootstrap => 1,
+	}
+};
+
+
 get '/details/*/*' => sub {
 	my ($id, $conc_id) = splat;
 
@@ -221,18 +306,23 @@ post '/save/*' => sub {
 
 	my $username = param('username');
 
-	my %fields  = params();
+        my %fields  = params();
 	my @classes = grep { /^class\d+$/ } keys %fields;
 
-	for my $class (@classes) {
-		next unless param($class) > 0;
-		$class =~ /class(\d+)/;
-		my $conc_id = $1;
-		_save_revision($id, $conc_id,
-				param($class), param("obs$conc_id"), $username);
-	}
+        _clear_annotations_project_user($id, $username);
 
-	redirect '/';
+	for my $class (@classes) {
+            my $v = $fields{$class};
+            my @values = (ref($v) || "") eq "ARRAY" ? @$v : $v;
+
+            for my $val (@values) {
+                $class =~ /class(\d+)/;
+	 	my $conc_id = $1;
+	 	_save_revision($id, $conc_id, $val, $fields{"obs$conc_id"}, $username);
+            }
+        }
+
+        redirect '/';
 };
 
 get '/' => sub {
@@ -286,6 +376,13 @@ sub _get_classes {
 	[ database->quick_select('classes', { rev_id => $id }, { order_by => 'order' })]
 }
 
+sub _clear_annotations_project_user {
+    my ($id, $username) = @_;
+
+    my $sth = database->prepare("DELETE FROM revision WHERE username = ? AND conc_id IN (SELECT id FROM conc WHERE rev_id = ?)");
+    $sth->execute($username, $id);
+}
+
 # CREATE TABLE "revision" ("conc_id" INTEGER NOT NULL,
 #                          "class_id" INTEGER NOT NULL,
 #                          "username" VARCHAR NOT NULL,
@@ -316,10 +413,10 @@ sub _save_revision {
 	$dbh->execute($conc_id, $classe, $username, time, $obs);
 }
 
-sub _get_user_revisions {
+sub _get_user_obs {
     my ($pid, $uname) = @_;
     my $sth = database->prepare(q{
-            SELECT revision.conc_id, revision.class_id, revision.obs
+            SELECT revision.conc_id, revision.obs
             FROM revision INNER JOIN conc
             ON revision.conc_id = conc.id
             WHERE conc.rev_id = ? AND revision.username = ?;
@@ -328,10 +425,26 @@ sub _get_user_revisions {
     my $data = $sth->fetchall_arrayref( {} );
     my $res = {};
     for (@$data) {
-        $res->{$_->{conc_id}} = {class => $_->{class_id}, obs => $_->{obs}};
+        $res->{$_->{conc_id}} = $_->{obs};
     }
     return $res;
-    
+}
+
+sub _get_user_revisions {
+    my ($pid, $uname) = @_;
+    my $sth = database->prepare(q{
+            SELECT revision.conc_id, revision.class_id
+            FROM revision INNER JOIN conc
+            ON revision.conc_id = conc.id
+            WHERE conc.rev_id = ? AND revision.username = ?;
+    });
+    $sth->execute($pid, $uname);
+    my $data = $sth->fetchall_arrayref( {} );
+    my $res = {};
+    for (@$data) {
+        push @{$res->{$_->{conc_id}}}, $_->{class_id};
+    }
+    return $res;
 }
 
 sub _get_users_for_project {
@@ -362,14 +475,26 @@ sub query {
         $cqp->exec("A = $query;");
         my $result_size = $cqp->size('A');
         $result_size = 1000 if $result_size > 1000;
+
+        # return map { 
+        #     $_ =~ s/>/&gt;/g;
+        #     $_ =~ s/</&lt;/g;
+        #     $_
+        # } 
         return $cqp->cat('A', 0, $result_size);
+
     } catch {
         die "Erro ao procurar: $query\n";
     };
 }
 
 sub guess_query {
-    return $_[0];
+    my $query = shift;
+    if ($query =~ m!^[^"\[]+$!) {
+        my @words = split /\s+/, $query;
+        $query = join(" ", map { "[word=\"$_\"]" } @words);
+    }
+    return $query;
 }
 
 # CREATE TABLE "rev" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "titulo" , "open" BOOL NOT NULL  DEFAULT 1, "user" VARCHAR, "desc" VARCHAR);
