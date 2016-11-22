@@ -30,3 +30,8 @@
 </form>
 
 
+<% IF show_debug %>
+  <% USE Dumper %>
+  <% Dumper.dump_html(session) %>
+<% END %>
+

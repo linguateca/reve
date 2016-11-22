@@ -16,6 +16,7 @@ Definição de classes de classificação:
      margin: 4px;
      padding: 4px;
      border: solid 1px #999999;
+     background-color: #dedede;
   }
 </style>
 
@@ -23,6 +24,9 @@ Definição de classes de classificação:
   function add() {
       var classe = $('#classe').val();
       var texto  = $('#descritor').val();
+      if ($('#classes').html().match(/nenhuma classe definida/)) {
+        $('#classes').html("");
+      }
       $('#classes').append( "<input type='hidden' name='class' value='"+classe+"'/>");
       $('#classes').append( "<input type='hidden' name='classD' value='"+texto+"'/>");
       if (texto.length > 40) {
@@ -36,7 +40,7 @@ Definição de classes de classificação:
 
 <form method="POST" action="<% request.uri_base %>/new">
   <input type="hidden" name="step" value="4"/>
-  <div id="classes"></div>
+  <div id="classes">(nenhuma classe definida)</div>
   
   <p>
     <label>Identificador da classe: 
@@ -61,4 +65,9 @@ Definição de classes de classificação:
 <% ELSE %>
   <!-- sem exemplos, nada feito -->
 <p>Não selecionou nenhuma concordância. Processo abortado.</p>
+<% END %>
+
+<% IF show_debug %>
+   <% USE Dumper %>
+   <% Dumper.dump_html(session) %>
 <% END %>
