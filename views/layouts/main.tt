@@ -4,6 +4,7 @@
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=<% settings.charset %>" />
 <title>ReVe</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 <link rel="stylesheet" href="<% request.uri_base %>/css/style.css" />
 
 <!-- Grab Google CDN's jQuery. fall back to local if necessary -->
@@ -12,7 +13,9 @@
     !window.jQuery && document.write('<script type="text/javascript" src="<% request.uri_base %>/javascripts/jquery.min.js"><\/script>')
 /* ]]> */</script>
 <script src="<% request.uri_base %>/javascripts/reve.js" type="text/javascript"></script>
-
+<script type="text/javascript">
+  var uri_base = "<% request.uri_base %>";
+  </script>
 </head>
 <body>
 

@@ -2,10 +2,16 @@
 <script type="text/javascript">
   $(
     function () {
-      esconder_revisoes();
-      obtain_user_name();
+  esconder_revisoes();
+<% IF from_user %>  
+  obtain_user_name_to_review("<% from_user %>");
+<% ELSE %>
+  obtain_user_name();
+<% END %>
     }
   );
+
+  var project_id = <% project.id %>;
 </script>
 
 <!-- % USE Dumper % -->
@@ -31,17 +37,35 @@
 <input type="submit" name="save" value="Guardar"/>
 <% FOREACH conc IN concs %>
  <div class="conc">
-    <div class="class">
-      <select name="class<% conc.id %>">
-       <option value="0">---</option>
-        <% FOREACH class IN classes %>
-        <option value="<% class.id %>"
-           <% IF conc.class AND conc.class.class_id == class.id %> selected <% END %>
-        >
-         <% class.name %></option>
-        <% END %>
-      </select>
-      <textarea name="obs<% conc.id %>"></textarea>
+   <div class="class">
+
+     <dl class="dropdown" id="drop<% conc.id %>"> 
+  
+    <dt>
+      <span class="hida">Selecionar...</span>    
+      <p class="multiSel"></p>  
+    </dt>
+  
+    <dd>
+      <div class="mutliSelect">
+        <ul>
+            
+          <% FOREACH class IN classes %>
+          <li>
+            <label>
+              <input type="checkbox" name="class<% conc.id %>"
+                     value="<% class.id %>" label="<% class.name %>"/>
+              <% class.name %>
+            </label>
+          </li>
+          <% END %>
+
+        </ul>
+      </div>
+    </dd>
+</dl>
+
+      <textarea id="obs<% conc.id %>" name="obs<% conc.id %>"></textarea>
    </div>
    <div class="text">
      <% conc.text %>
